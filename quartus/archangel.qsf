@@ -38,7 +38,7 @@
 
 
 set_global_assignment -name FAMILY "Cyclone V"
-set_global_assignment -name DEVICE 5CEFA7U19I7
+set_global_assignment -name DEVICE 5CEFA9U19I7
 set_global_assignment -name TOP_LEVEL_ENTITY archangel
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 25.1STD.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "20:25:17  OCTOBER 20, 2026"
@@ -54,11 +54,15 @@ set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_symbol
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_signal_integrity
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_boundary_scan
-set_global_assignment -name VHDL_FILE ../src/archangel.vhd
-set_global_assignment -name VHDL_FILE ../src/counter.vhd
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_location_assignment PIN_H10 -to clk100M
+set_instance_assignment -name IO_STANDARD LVDS -to clk100M
+set_location_assignment PIN_G11 -to "clk100M(n)"
+set_global_assignment -name SDC_FILE constraints.sdc
+set_global_assignment -name VHDL_FILE ../src/archangel.vhd
+set_global_assignment -name VHDL_FILE ../src/counter.vhd
+set_global_assignment -name VHDL_FILE ../src/mdio.vhd

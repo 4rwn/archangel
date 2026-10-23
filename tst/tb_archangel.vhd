@@ -5,28 +5,27 @@ entity tb_archangel is
 end entity;
 
 architecture rtl of tb_archangel is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK100M_PERIOD : time := 10 ns;
 
-    signal clk : std_logic := '0';
-    signal reset : std_logic := '0';
+    signal clk100M : std_logic := '0';
+
+    signal enet_mdc : std_logic := '0';
+    signal enet_mdio : std_logic := '0';
 begin
 
-clk <= not clk after CLK_PERIOD / 2;
+clk100M <= not clk100M after CLK100M_PERIOD / 2;
 
 dut: entity work.archangel
 port map (
-    clk   => clk,
-    reset => reset
+    clk100M_i => clk100M,
+
+    enet_mdc_o => enet_mdc,
+    enet_mdio_io => enet_mdio
 );
 
 process
 begin
-    reset <= '1';
-
-    wait for 5 * CLK_PERIOD;
-    reset <= '0';
-
-    wait for 20 us;
+    wait for 2 ms;
     std.env.stop;
     wait;
 end process;
