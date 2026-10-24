@@ -7,7 +7,8 @@ entity archangel is
         clk100M_i : in std_logic;
 
         enet_mdc_o : out std_logic;
-        enet_mdio_io : inout std_logic
+        enet_mdio_io : inout std_logic;
+        enet_resetn_1v8_o : out std_logic
     );
 end entity;
 
@@ -21,7 +22,7 @@ architecture rtl of archangel is
     signal clk2M5_fall_en : std_logic := '0';
 
     signal mdio_start : std_logic := '0';
-    signal mdio_reg_addr : unsigned(4 downto 0) := (others => '0');
+    signal mdio_phy_addr : unsigned(3 downto 0) := (others => '0');
 
     signal cnt : unsigned(29 downto 0) := (0 => '1', others => '0');
 begin
@@ -58,7 +59,7 @@ begin
             mdio_start <= '1';
         end if;
         if mdio_start = '1' then
-            mdio_reg_addr <= mdio_reg_addr + 1;
+            mdio_phy_addr <= mdio_phy_addr + 1;
         end if;
     end if;
 end process;
@@ -71,7 +72,9 @@ port map (
 
     start_i => mdio_start,
     rd_nwr_i => '1',
-    reg_addr => std_logic_vector(mdio_reg_addr),
+    phy_addr_i(4) => '0',
+    phy_addr_i(3 downto 0) => std_logic_vector(mdio_phy_addr),
+    reg_addr_i => "00010",
     data_i => (others => '0'),
 
     done_o => open,
@@ -86,5 +89,6 @@ port map (
 enet_mdc_o <= mdc;
 enet_mdio_io <= '0' when mdio_tx_en = '1' and mdio_tx = '0' else 'Z';
 mdio_rx <= enet_mdio_io;
+enet_resetn_1v8_o <= '1';
 
 end architecture;

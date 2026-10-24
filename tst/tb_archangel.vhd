@@ -16,6 +16,7 @@ architecture sim of tb_archangel is
     signal rise_en, fall_en : std_logic := '0';
     signal start : std_logic := '0';
     signal reg_addr : std_logic_vector(4 downto 0) := (others => '0');
+    signal phy_addr : std_logic_vector(4 downto 0) := (others => '0');
     signal done, err, tx_en, tx : std_logic;
     signal data : std_logic_vector(15 downto 0);
     signal mdio : std_logic;
@@ -31,7 +32,8 @@ begin
         clk2M5_rise_en_i => rise_en,
         clk2M5_fall_en_i => fall_en,
         start_i => start,
-        rd_nwr_i => '1',
+        reg_addr_i => '1',
+        phy_addr_i => phy_addr,
         reg_addr => reg_addr,
         data_i => (others => '0'),
         done_o => done,
@@ -91,10 +93,12 @@ begin
                     report "Incorrect start field; header = " & to_string(header) severity failure;
                 assert header(11 downto 10) = "10"
                     report "Expected read opcode" severity failure;
-                assert header(9 downto 5) = "00000"
-                    report "Incorrect PHY address" severity failure;
                 address := to_integer(unsigned(header(4 downto 0)));
                 assert address <= 3 report "Unexpected register address" severity failure;
+                -- Use PHY addresses 0, 5, 10, and 15 to verify the address
+                -- field independently of the register field and its bit order.
+                assert unsigned(header(9 downto 5)) = address * 5
+                    report "Incorrect PHY address" severity failure;
                 response := REGISTERS(address);
 
                 -- First turnaround slot: host must release the line.
@@ -133,6 +137,7 @@ begin
         for address in 0 to 3 loop
             wait until falling_edge(clk);
             reg_addr <= std_logic_vector(to_unsigned(address, 5));
+            phy_addr <= std_logic_vector(to_unsigned(address * 5, 5));
             start <= '1';
             wait until falling_edge(clk);
             start <= '0';

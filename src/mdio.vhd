@@ -10,7 +10,8 @@ entity mdio is
         
         start_i : in std_logic;
         rd_nwr_i : in std_logic;
-        reg_addr : in std_logic_vector(4 downto 0);
+        phy_addr_i : in std_logic_vector(4 downto 0);
+        reg_addr_i : in std_logic_vector(4 downto 0);
         data_i : in std_logic_vector(15 downto 0);
 
         done_o : out std_logic;
@@ -52,7 +53,7 @@ begin
                     opcode := "01";
                 end if;
 
-                cmd <= x"FFFFFFFF" & "01" & opcode & "00000" & reg_addr & "10" & data_i;
+                cmd <= x"FFFFFFFF" & "01" & opcode & phy_addr_i & reg_addr_i & "10" & data_i;
 
                 state <= S_SEND;
                 idx <= (others => '0');
