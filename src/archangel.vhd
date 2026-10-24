@@ -20,12 +20,15 @@ architecture rtl of archangel is
     signal clk2M5_rise_en : std_logic := '0';
     signal clk2M5_fall_en : std_logic := '0';
 
-    signal secs : std_logic_vector(15 downto 0) := (others => '0');
     signal mdio_start : std_logic := '0';
-    signal mdio_started : std_logic := '0';
+    signal mdio_reg_addr : unsigned(4 downto 0) := (others => '0');
+
+    signal cnt : unsigned(29 downto 0) := (0 => '1', others => '0');
 begin
 
 process (clk100M_i)
+    constant CLK2M5_DIVIDER : integer := 40;
+
     variable clk2M5_counter : unsigned(4 downto 0) := (others => '0');
 begin
     if rising_edge(clk100M_i) then
@@ -33,7 +36,7 @@ begin
         clk2M5_fall_en <= '0';
 
         clk2M5_counter := clk2M5_counter + 1;
-        if clk2M5_counter = 20 then
+        if clk2M5_counter = CLK2M5_DIVIDER / 2 then
             clk2M5_counter := (others => '0');
 
             mdc <= not mdc;
@@ -46,21 +49,16 @@ begin
     end if;
 end process;
 
-cnt : entity work.timer
-port map (
-    clk100M_i => clk100M_i,
-    clk2M5_rise_en_i => clk2M5_rise_en,
-
-    secs_o => secs
-);
-
 process (clk100M_i)
 begin
     if rising_edge(clk100M_i) then
         mdio_start <= '0';
-        if unsigned(secs) = 1 and mdio_started = '0' then
+        cnt <= cnt + 1;
+        if cnt = 0 then
             mdio_start <= '1';
-            mdio_started <= '1';
+        end if;
+        if mdio_start = '1' then
+            mdio_reg_addr <= mdio_reg_addr + 1;
         end if;
     end if;
 end process;
@@ -72,6 +70,13 @@ port map (
     clk2M5_fall_en_i => clk2M5_fall_en,
 
     start_i => mdio_start,
+    rd_nwr_i => '1',
+    reg_addr => std_logic_vector(mdio_reg_addr),
+    data_i => (others => '0'),
+
+    done_o => open,
+    data_o => open,
+    err_o => open,
 
     mdio_tx_en_o => mdio_tx_en,
     mdio_tx_o => mdio_tx,
