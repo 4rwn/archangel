@@ -22,9 +22,9 @@ architecture rtl of archangel is
     signal clk2M5_fall_en : std_logic := '0';
 
     signal mdio_start : std_logic := '0';
-    signal mdio_phy_addr : unsigned(3 downto 0) := (others => '0');
+    signal mdio_reg_addr : unsigned(4 downto 0) := (others => '0');
 
-    signal cnt : unsigned(29 downto 0) := (0 => '1', others => '0');
+    signal cnt : unsigned(19 downto 0) := (0 => '1', others => '0');
 begin
 
 process (clk100M_i)
@@ -59,7 +59,7 @@ begin
             mdio_start <= '1';
         end if;
         if mdio_start = '1' then
-            mdio_phy_addr <= mdio_phy_addr + 1;
+            mdio_reg_addr <= mdio_reg_addr + 1;
         end if;
     end if;
 end process;
@@ -72,9 +72,8 @@ port map (
 
     start_i => mdio_start,
     rd_nwr_i => '1',
-    phy_addr_i(4) => '0',
-    phy_addr_i(3 downto 0) => std_logic_vector(mdio_phy_addr),
-    reg_addr_i => "00010",
+    phy_addr_i => "01111",
+    reg_addr_i => std_logic_vector(mdio_reg_addr),
     data_i => (others => '0'),
 
     done_o => open,
@@ -89,6 +88,6 @@ port map (
 enet_mdc_o <= mdc;
 enet_mdio_io <= '0' when mdio_tx_en = '1' and mdio_tx = '0' else 'Z';
 mdio_rx <= enet_mdio_io;
-enet_resetn_1v8_o <= '1';
+enet_resetn_1v8_o <= '0';
 
 end architecture;
